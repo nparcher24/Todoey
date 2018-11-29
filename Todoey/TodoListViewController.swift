@@ -10,14 +10,14 @@ import UIKit
 
 class TodoListViewController: UITableViewController {
     
-    var itemArray = ["Find Mike", "Buy Eggos", "Defeat Demogorgon"]
+    var itemArray = [Item(startingTitle: "Find Mike"), Item(startingTitle: "Buy Eggos"), Item(startingTitle: "Defeat Demogorgon")]
     let defaults = UserDefaults.standard
     
 
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        if let items = defaults.array(forKey: "List Array") as? [String] {
+        if let items = defaults.array(forKey: "List Array") as? [Item] {
             itemArray = items
         }
         
@@ -29,7 +29,14 @@ class TodoListViewController: UITableViewController {
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let theCell = tableView.dequeueReusableCell(withIdentifier: "TodoItemCell", for: indexPath)
-        theCell.textLabel?.text = itemArray[indexPath.row]
+        let item = itemArray[indexPath.row]
+        theCell.textLabel?.text = item.title
+        
+        //Ternary Operator!!!
+        // value = condition ? valueIfTrue : valueIfFalse
+        
+        theCell.accessoryType = item.isChecked ? .checkmark : .none
+        
         return theCell
         
     }
@@ -47,11 +54,8 @@ class TodoListViewController: UITableViewController {
         print(theText!)
         tableView.deselectRow(at: indexPath, animated: true)
         
-        if cell?.accessoryType == .checkmark {
-            cell?.accessoryType = .none
-        } else {
-            cell?.accessoryType = .checkmark
-        }
+        itemArray[indexPath.row].isChecked = !itemArray[indexPath.row].isChecked
+        tableView.reloadData()
         
     }
     
@@ -61,16 +65,17 @@ class TodoListViewController: UITableViewController {
     @IBAction func addButtonPressed(_ sender: UIBarButtonItem) {
         // UIAlert popup and request info
         let alert = UIAlertController(title: "Add New Todoey Item", message: "", preferredStyle: .alert)
-        var textField = UITextField()  //Changing the scope of the alert text field
+        var textField = UITextField()  //Changing the scope of the alert text field  
         
         let action = UIAlertAction(title: "Add Item", style: .default) { (action)
             in
             //What will happen when the user clicks the add item
             
             //print("Success \(textField.text!)")
-            self.itemArray.append(textField.text!)
+            self.itemArray.append(Item(startingTitle:  textField.text!))
             self.tableView.reloadData()
             self.defaults.set(self.itemArray, forKey: "List Array")
+            //self.defaults.set
             
         }
         alert.addAction(action)
